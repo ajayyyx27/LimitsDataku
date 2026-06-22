@@ -14,15 +14,25 @@ class BlockerAccessibilityService : AccessibilityService() {
         val limits = LimitsStore.getLimits(this)
         val limitMinutes = limits[packageName] ?: return
         val usm = getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
+
+        // Get start of CURRENT hour only
         val cal = Calendar.getInstance()
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
+        val startOfHour = cal.timeInMillis
         val now = System.currentTimeMillis()
-        val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, cal.timeInMillis, now)
-        val usedMs = stats?.filter { it.packageName == packageName }
+
+        // Query only from start of current hour to now
+        val stats = usm.queryUsageStats(
+            UsageStatsManager.INTERVAL_BEST, startOfHour, now)
+
+        val usedMs = stats
+            ?.filter { it.packageName == packageName }
             ?.sumOf { it.totalTimeInForeground } ?: 0L
+
         val usedMinutes = (usedMs / 60000).toInt()
+
         if (usedMinutes >= limitMinutes) {
             try {
                 val appName = packageManager.getApplicationLabel(
