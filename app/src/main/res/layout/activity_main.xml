@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_dark"
+    android:padding="20dp">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="AppLimiter" android:textColor="@color/text_primary"
+        android:textSize="28sp" android:textStyle="bold" android:layout_marginBottom="4dp"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Set hourly time limits for any app"
+        android:textColor="@color/text_secondary" android:textSize="14sp"
+        android:layout_marginBottom="16dp"/>
+    <Button android:id="@+id/addAppButton" android:layout_width="match_parent"
+        android:layout_height="50dp" android:text="+ Add App to Limit"
+        android:textColor="@android:color/white" android:background="@drawable/button_bg"
+        android:layout_marginBottom="16dp"/>
+    <ListView android:id="@+id/limitsListView" android:layout_width="match_parent"
+        android:layout_height="0dp" android:layout_weight="1"
+        android:divider="@null" android:dividerHeight="12dp"/>
+    <Button android:id="@+id/accessibilityButton" android:layout_width="match_parent"
+        android:layout_height="46dp" android:text="Enable Accessibility Permission"
+        android:textColor="@color/accent_teal" android:background="@drawable/button_outline_bg"
+        android:layout_marginTop="12dp"/>
+    <Button android:id="@+id/usageAccessButton" android:layout_width="match_parent"
+        android:layout_height="46dp" android:text="Enable Usage Access Permission"
+        android:textColor="@color/accent_teal" android:background="@drawable/button_outline_bg"
+        android:layout_marginTop="8dp"/>
+</LinearLayout>
