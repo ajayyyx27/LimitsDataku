@@ -1,6 +1,7 @@
 package com.applimiter.app
 
 import android.accessibilityservice.AccessibilityService
+import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Intent
 import android.view.accessibility.AccessibilityEvent
@@ -15,7 +16,7 @@ class BlockerAccessibilityService : AccessibilityService() {
         val limitMinutes = limits[packageName] ?: return
         val usm = getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
 
-        // Get start of CURRENT hour only
+        // Get start of current hour
         val cal = Calendar.getInstance()
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)
@@ -23,13 +24,27 @@ class BlockerAccessibilityService : AccessibilityService() {
         val startOfHour = cal.timeInMillis
         val now = System.currentTimeMillis()
 
-        // Query only from start of current hour to now
-        val stats = usm.queryUsageStats(
-            UsageStatsManager.INTERVAL_BEST, startOfHour, now)
+        // Use UsageEvents for accurate per-hour tracking
+        val usageEvents = usm.queryEvents(startOfHour, now)
+        var usedMs = 0L
+        var lastForeground = 0L
+        val event2 = UsageEvents.Event()
 
-        val usedMs = stats
-            ?.filter { it.packageName == packageName }
-            ?.sumOf { it.totalTimeInForeground } ?: 0L
+        while (usageEvents.hasNextEvent()) {
+            usageEvents.getNextEvent(event2)
+            if (event2.packageName != packageName) continue
+            when (event2.eventType) {
+                UsageEvents.Event.ACTIVITY_RESUMED -> lastForeground = event2.timeStamp
+                UsageEvents.Event.ACTIVITY_PAUSED -> {
+                    if (lastForeground > 0) {
+                        usedMs += event2.timeStamp - lastForeground
+                        lastForeground = 0
+                    }
+                }
+            }
+        }
+        // If app is currently in foreground
+        if (lastForeground > 0) usedMs += now - lastForeground
 
         val usedMinutes = (usedMs / 60000).toInt()
 
